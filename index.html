@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Escrow & Node Provisioning Gateway</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f3f4f6; padding: 40px; }
+        .container { max-width: 700px; margin: 0 auto; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .header { border-bottom: 1px solid #1f2937; padding-bottom: 20px; margin-bottom: 20px; }
+        .badge { background: #374151; color: #9ca3af; padding: 4px 10px; border-radius: 6px; font-size: 12px; margin-right: 5px; display: inline-block; margin-top: 5px; }
+        .section { margin-bottom: 20px; }
+        .card { background: #1f2937; padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .wallet-box { background: #374151; padding: 12px; border-radius: 6px; font-family: monospace; word-break: break-all; color: #60a5fa; font-size: 14px; }
+        .btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+        .btn:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Secure Deployment & Verification Gateway</h2>
+        <p style="color: #9ca3af; font-size: 14px;">Session ID: <strong>ENG-MIG-7842X</strong></p>
+    </div>
+
+    <!-- Candidate Profile Section -->
+    <div class="section">
+        <h3>Assigned Candidate Profile</h3>
+        <p><strong>Role:</strong> Full-Stack & Data Migration Engineer</p>
+        <p><strong>Experience:</strong> 5 Years Full-Stack Development</p>
+        <div>
+            <span class="badge">TypeScript</span>
+            <span class="badge">React</span>
+            <span class="badge">Next.js</span>
+            <span class="badge">Python</span>
+            <span class="badge">SQL</span>
+            <span class="badge">MongoDB</span>
+        </div>
+    </div>
+
+    <!-- Project Scope & Compensation -->
+    <div class="section">
+        <h3>Project Scope & Terms</h3>
+        <p style="font-size: 14px; color: #d1d5db;">Scaling a high-concurrency Node/Next.js frontend coupled with a Python-based data ingestion pipeline and a distributed MongoDB/SQL storage layer focusing on database indexing and real-time dashboard analytics.</p>
+        <div class="card">
+            <p><strong>Phase 1 (Evaluation Sprint):</strong> $3,500 (2-Week Validation)</p>
+            <p><strong>Phase 2 (Retainer):</strong> $6,500 / month recurring</p>
+        </div>
+    </div>
+
+    <!-- Escrow & Fee Breakdown -->
+    <div class="section">
+        <h3>Escrow & Compliance Ledger</h3>
+        <div class="card">
+            <p>Client Escrow Stake Locked: <span style="color: #34d399; font-weight: bold;">$1,500.00 USD</span></p>
+            <p>Network & Verification Allocation Fee: <span style="color: #f87171; font-weight: bold;">$75.00 USD equivalent</span></p>
+            <p style="font-size: 12px; color: #9ca3af; margin-top: 8px;">*Note: The allocation fee is fully refundable and automatically returned alongside your Phase 1 milestone payout.</p>
+        </div>
+    </div>
+
+    <!-- Payment Gateway Section -->
+    <div class="section">
+        <h3>Complete Verification Transfer</h3>
+        <p style="font-size: 14px;">Send exactly <strong>$75.00 USD</strong> equivalent in cryptocurrency to the designated escrow address below:</p>
+        
+        <div class="wallet-box" id="walletAddr">
+            bc1q8et9gnnltyw7mhmnf2lnzza27rfqd5c83662pt
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <label style="font-size: 13px; color: #9ca3af;">Paste Transaction Hash (TXID) after transfer:</label>
+            <input type="text" placeholder="0x..." style="width: 100%; padding: 10px; margin-top: 5px; background: #374151; border: 1px solid #4b5563; color: white; border-radius: 6px;">
+        </div>
+
+        <button class="btn">Verify & Provision Workspace</button>
+    </div>
+</div>
+
+</body>
+</html>
