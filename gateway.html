@@ -1,30 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Architecture & Workspace Provisioning</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>GDAS | Sentinel Dashboard</title>
+  <link rel="stylesheet" href="assets/gdas-dashboard.css">
+  <script src="assets/gdas-dashboard.js" defer></script>
 </head>
-<body class="min-h-screen bg-[#0b0f19] text-[#f3f4f6] p-6 md:p-12 font-sans">
-
-    <div class="max-w-3xl mx-auto bg-[#111827] border border-[#1f2937] rounded-xl p-6 md:p-8 shadow-2xl">
-        
-        <!-- Header -->
-        <div class="border-b border-[#1f2937] pb-6 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">Enterprise Architecture & Workspace Provisioning</h1>
-                <p class="text-gray-400 text-sm mt-1">Session ID: <strong class="text-gray-200">ENG-MIG-7842X</strong></p>
-            </div>
-            <span class="bg-blue-950/60 border border-blue-800/50 text-blue-400 px-3 py-1 rounded-full text-xs font-medium w-fit">
-                Next.js App Router &bull; Supabase Stack
-            </span>
-        </div>
-
-        <!-- Candidate Profile Section -->
-        <div class="mb-6">
-            <h2 class="text-lg font-semibold mb-3">Assigned Candidate Profile</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300 mb-3">
-                <p><strong>Role:</strong> Full-Stack & Data Migration Engineer</p>
-                <p><strong>Experience:</strong> 5 Years Full-Stack Development</p>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <a class="brand" href="#overview" aria-label="GDAS dashboard"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span><strong>GDAS</strong><small>GLOBAL DIGITAL ASSET SENTINEL</small></span></a>
+      <div class="side-label">Workspace</div>
+      <nav class="side-nav">
+        <button class="side-link is-active" type="button" data-tab-target="overview"><span class="nav-dot"></span>Overview</button>
+        <button class="side-link" type="button" data-tab-target="discovery"><span class="nav-dot"></span>Discovery &amp; queue</button>
+        <button class="side-link" type="button" data-tab-target="claims"><span class="nav-dot"></span>Claims &amp; withdrawal</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="local-note"><span class="local-pulse"></span><div><strong>Local-only mode</strong><small>No remote dashboard calls</small></div></div><p>Read-only state viewer<br>Signing is not connected</p></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="crumb"><span>GDAS</span><b>/</b><strong>Sentinel</strong></div><div class="topbar-actions"><span class="data-mode"><span class="mode-dot"></span>LOCAL DATA</span><time id="report-date"></time></div></header>
+      <section class="page-heading"><div><p class="eyebrow">GLOBAL DIGITAL ASSET SENTINEL <span class="version-tag">STAGE G</span></p><h1>Operations overview</h1><p class="lede">Evidence, eligibility, claims, and realized outcomes in one read-only view.</p></div><div class="import-actions" aria-label="Import local state"><label class="import-button" for="ledger-file">Import audit ledger<input id="ledger-file" type="file" accept=".jsonl,.ndjson,application/x-ndjson,application/json"></label><label class="import-button" for="state-file">Import state JSON<input id="state-file" type="file" accept=".json,application/json"></label></div></section>
+      <section class="health-banner" aria-label="System and policy status"><div class="health-main"><span class="health-icon" aria-hidden="true">·</span><div><strong id="health-title">State not loaded</strong><p id="health-description">Choose local ledger or state files to populate this dashboard. No remote requests are made.</p></div></div><div class="health-divider"></div><div class="policy-health"><span class="policy-shield" aria-hidden="true">0</span><div><strong>Zero-capital guard</strong><small id="policy-description">Dashboard actions cannot spend, sign, or submit.</small></div><span class="status-pill status-neutral" id="policy-status">READ ONLY</span></div></section>
+      <section class="metrics-grid" aria-label="Reward summary">
+        <article class="metric"><div class="metric-top"><span>Confirmed receipts</span><span class="metric-mark mark-green">R</span></div><strong class="metric-value" id="metric-receipts">0</strong><small id="metric-receipts-note">No confirmed receipts recorded</small></article>
+        <article class="metric"><div class="metric-top"><span>Pending claims</span><span class="metric-mark mark-amber">P</span></div><strong class="metric-value" id="metric-pending">0</strong><small>Awaiting platform resolution</small></article>
+        <article class="metric"><div class="metric-top"><span>Locked assets</span><span class="metric-mark mark-slate">L</span></div><strong class="metric-value" id="metric-locked">0</strong><small>Not currently transferable</small></article>
+        <article class="metric"><div class="metric-top"><span>Speculative tokens</span><span class="metric-mark mark-orange">S</span></div><strong class="metric-value" id="metric-speculative">0</strong><small>Excluded from cash income</small></article>
+        <article class="metric metric-income"><div class="metric-top"><span>Realized proceeds</span><span class="metric-mark mark-ink">$</span></div><strong class="metric-value" id="metric-realized">$0</strong><small id="metric-income-note">Zero confirmed earnings</small></article>
+      </section>
+      <div class="section-tabs" role="tablist" aria-label="Dashboard sections"><button class="section-tab is-selected" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" data-tab-target="overview">Overview</button><button class="section-tab" id="tab-discovery" role="tab" aria-selected="false" aria-controls="panel-discovery" data-tab-target="discovery">Discovery &amp; task queue <span class="tab-count" id="discovery-count">0</span></button><button class="section-tab" id="tab-claims" role="tab" aria-selected="false" aria-controls="panel-claims" data-tab-target="claims">Claim &amp; withdrawal manager <span class="tab-count" id="claim-count">0</span></button></div>
+      <section class="tab-panel is-visible" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-panel="overview"><div class="overview-grid"><article class="surface"><div class="surface-heading"><div><p class="eyebrow">ACCUMULATION</p><h2>Reward status</h2></div><span class="quiet-tag" id="ledger-state">No ledger</span></div><div class="earnings-callout"><span class="callout-symbol" aria-hidden="true">0</span><div><strong id="earnings-headline">Zero confirmed earnings</strong><p id="earnings-copy">Confirmed payouts and realized proceeds will appear here after ledger import.</p></div></div><div class="accumulation-list"><div><span>Advertised rewards</span><strong id="summary-advertised">0</strong></div><div><span>Completed tasks</span><strong id="summary-completed">0</strong></div><div><span>Approved claims</span><strong id="summary-approved">0</strong></div><div><span>Pending receipts</span><strong id="summary-pending-receipts">0</strong></div><div><span>Transferable balances</span><strong id="summary-transferable">0</strong></div><div><span>Withdrawable balances</span><strong id="summary-withdrawable">0</strong></div></div></article>
+        <article class="surface"><div class="surface-heading"><div><p class="eyebrow">OPERATIONS</p><h2>Queue status</h2></div><span class="queue-total" id="queue-total">0 tasks</span></div><div class="queue-bars"><div class="queue-row"><span>Queued</span><div class="bar-track"><i id="bar-queued"></i></div><strong id="queue-queued">0</strong></div><div class="queue-row"><span>Completed</span><div class="bar-track"><i id="bar-completed"></i></div><strong id="queue-completed">0</strong></div><div class="queue-row"><span>Blocked</span><div class="bar-track"><i id="bar-blocked"></i></div><strong id="queue-blocked">0</strong></div><div class="queue-row"><span>Failed / expired</span><div class="bar-track"><i id="bar-failed"></i></div><strong id="queue-failed">0</strong></div></div><div class="activity-foot"><span>Integrity check</span><strong id="integrity-label">Not loaded</strong></div></article></div><article class="surface source-strip"><div><p class="eyebrow">DATA BOUNDARY</p><strong>Local files only</strong><p>Imported data stays in this browser tab. Nothing is uploaded or written back.</p></div><span class="boundary-mark">LOCAL<br>READ</span></article></section>
+      <section class="tab-panel" id="panel-discovery" role="tabpanel" aria-labelledby="tab-discovery" data-panel="discovery" hidden><div class="panel-intro"><div><p class="eyebrow">OPPORTUNITY PIPELINE</p><h2>Discovery &amp; task queue</h2><p>Eligibility is evidence-based. Execution region is never treated as legal residency.</p></div><span class="quiet-tag">READ ONLY</span></div><div class="table-shell"><table><thead><tr><th>Opportunity</th><th>Source</th><th>Eligibility</th><th>Score</th><th>Task state</th><th>Evidence</th></tr></thead><tbody id="opportunity-rows"></tbody></table><div class="empty-state" id="opportunity-empty"><strong>No local opportunities loaded</strong><p>Import an application state JSON containing scored opportunities to review this queue.</p></div></div></section>
+      <section class="tab-panel" id="panel-claims" role="tabpanel" aria-labelledby="tab-claims" data-panel="claims" hidden><div class="panel-intro"><div><p class="eyebrow">PAYOUT PATHWAYS</p><h2>Claim &amp; withdrawal manager</h2><p>Claim state, fee evidence, and approval boundaries. No payout is initiated here.</p></div><span class="quiet-tag">NO SIGNER CONNECTED</span></div><div class="pathway-grid"><article class="pathway-card"><div class="pathway-heading"><span class="pathway-code">A</span><div><h3>Crypto wallet</h3><p>On-chain claim intents</p></div><span class="pathway-type">HUMAN GATE</span></div><p class="pathway-desc">Confirmed receipt, fee cap, and sponsorship/reward deduction evidence required before approval.</p><div class="pathway-summary"><span>Prepared intents</span><strong id="crypto-intents">0</strong></div></article><article class="pathway-card pathway-usd"><div class="pathway-heading"><span class="pathway-code">B</span><div><h3>Virtual USD</h3><p>Platform / fiat-adjacent</p></div><span class="pathway-type">FEE CHECK</span></div><p class="pathway-desc">Minimum payout and opaque account binding required. Activation and unlock fees are blocked.</p><div class="pathway-summary"><span>Prepared claims</span><strong id="usd-intents">0</strong></div></article></div><div class="table-shell"><table><thead><tr><th>Reward / claim</th><th>Pathway</th><th>Status</th><th>Fee verification</th><th>Amount / network</th><th>Approval</th></tr></thead><tbody id="claim-rows"></tbody></table><div class="empty-state" id="claim-empty"><strong>No local claim intents</strong><p>Import an audit ledger to inspect prepared claims. This interface cannot sign or submit.</p></div></div></section>
+      <footer class="page-footer"><span>GDAS · Local state viewer</span><span>Non-custodial by design · No seed phrases · No deposits</span></footer>
+    </main>
+  </div>
+  <dialog class="approval-dialog" id="approval-dialog" aria-labelledby="approval-title"><form method="dialog" class="dialog-form"><button class="dialog-close" value="cancel" aria-label="Close dialog">×</button><p class="eyebrow">HUMAN APPROVAL GATE</p><h2 id="approval-title">Review claim intent</h2><p id="approval-detail">No claim selected.</p><div class="approval-warning"><strong>No signer or claim API is connected.</strong><span>Requesting review does not approve, sign, submit, or move assets.</span></div><div class="dialog-actions"><button class="button-secondary" value="cancel">Cancel</button><button class="button-primary" id="request-approval" type="button">Request human review</button></div><p class="dialog-status" id="approval-status" role="status" aria-live="polite"></p></form></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

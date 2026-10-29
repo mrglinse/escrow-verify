@@ -1,0 +1,85 @@
+name: GDAS 24/7 Continuous Sentinel
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: gdas-sentinel-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  run-sentinel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Find previous successful state artifact
+        id: previous-state
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.ref.replace(/^refs\/heads\//, '');
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'gdas-sentinel.yml',
+              branch,
+              status: 'success',
+              per_page: 20
+            });
+            const previous = data.workflow_runs.find((run) => run.id !== context.runId);
+            if (!previous) {
+              core.info('No previous successful sentinel run; starting with empty local state.');
+              return;
+            }
+            const { data: artifacts } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: previous.id,
+              per_page: 100
+            });
+            const state = artifacts.artifacts.find((artifact) => artifact.name === 'gdas-sentinel-state' && !artifact.expired);
+            if (state) core.setOutput('run-id', String(previous.id));
+            else core.info('Previous successful run has no retained state artifact; starting with empty local state.');
+
+      - name: Restore prior local state
+        if: steps.previous-state.outputs.run-id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: gdas-sentinel-state
+          run-id: ${{ steps.previous-state.outputs.run-id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          path: data
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Execute read-only sentinel pipeline
+        run: npm run sentinel -- --data-dir data
+
+      - name: Persist local state for next scheduled run
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gdas-sentinel-state
+          path: data/
+          if-no-files-found: error
+          retention-days: 7

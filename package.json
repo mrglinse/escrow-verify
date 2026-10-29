@@ -1,0 +1,14 @@
+{
+  "name": "gdas-discovery-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "discover": "node src/cli.mjs",
+    "sentinel": "node src/run-sentinel.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
