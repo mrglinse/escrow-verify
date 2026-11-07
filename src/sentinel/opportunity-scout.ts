@@ -1,46 +1,30 @@
-import fs from 'fs';
-import path from 'path';
+import { saveBountiesToSupabase } from './supabase-client';
 import { fetchAlgoraBounties } from './scout-algora';
+import { fetchGithubBounties } from './scout-github';
 import { fetchOpireBounties } from './scout-opire';
-import { fetchGitHubBounties } from './scout-github';
 
-async function runScoutFleet() {
-  console.log('🚀 [GDAS Fleet Orchestrator] Launching 3 Specialized Scouts...');
+async function runOpportunityScout() {
+  console.log('🔍 [Opportunity Scout] Scanning live Web3 & open-source bounties...');
 
-  const dataDir = path.join(process.cwd(), 'src/sentinel/data');
-  const dataFile = path.join(dataDir, 'discovered_issues.json');
+  try {
+    // 1. Gather bounties from active platform connectors
+    const algoraTasks = await fetchAlgoraBounties();
+    const githubTasks = await fetchGithubBounties();
+    const opireTasks = await fetchOpireBounties();
 
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+    const allBounties = [...algoraTasks, ...githubTasks, ...opireTasks];
+    console.log(`📊 [Opportunity Scout] Total bounties discovered: ${allBounties.length}`);
 
-  // Run all 3 scouts concurrently
-  const [algoraResults, opireResults, githubResults] = await Promise.all([
-    fetchAlgoraBounties(),
-    fetchOpireBounties(),
-    fetchGitHubBounties(),
-  ]);
-
-  const allDiscovered = [...algoraResults, ...opireResults, ...githubResults];
-
-  // Merge and deduplicate existing task queue
-  let existingTasks: any[] = [];
-  if (fs.existsSync(dataFile)) {
-    try {
-      existingTasks = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
-    } catch {
-      existingTasks = [];
+    if (allBounties.length > 0) {
+      // 2. Sync directly to Supabase cloud database
+      await saveBountiesToSupabase(allBounties);
+    } else {
+      console.log('ℹ️ No new bounties found in this scan cycle.');
     }
+
+  } catch (error) {
+    console.error('❌ Error during opportunity scout execution:', error);
   }
-
-  const existingIds = new Set(existingTasks.map(t => t.id));
-  const newTasks = allDiscovered.filter(t => !existingIds.has(t.id));
-
-  const updatedQueue = [...existingTasks, ...newTasks];
-
-  fs.writeFileSync(dataFile, JSON.stringify(updatedQueue, null, 2));
-  console.log(`✅ [Fleet Aggregator] Added ${newTasks.length} new bounties into queue. Total queue: ${updatedQueue.length}`);
 }
 
-runScoutFleet();
-
+runOpportunityScout();
