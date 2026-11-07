@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 // 🛑 Replace with your actual public MetaMask EVM address (0x...)
-const METAMASK_PAYOUT_ADDRESS = '0x505193364128b9145F02d686a844Fc649F5C07aC;
+const METAMASK_PAYOUT_ADDRESS = '0x505193364128b9145F02d686a844Fc649F5C07aC';
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 
 interface Task {
