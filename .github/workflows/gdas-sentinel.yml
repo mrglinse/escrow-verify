@@ -2,8 +2,11 @@ name: GDAS 24/7 Continuous Sentinel
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Runs automatically every 6 hours
-  workflow_dispatch: # Allows manual trigger
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-sentinel:
@@ -23,6 +26,9 @@ jobs:
           npm init -y
           npm install tsx typescript @types/node
 
+      - name: Ensure Data Directories Exist
+        run: mkdir -p src/sentinel/data src/sentinel/patches
+
       - name: Execute Anti-Scam Opportunity Scout
         run: npx tsx src/sentinel/opportunity-scout.ts
 
@@ -33,8 +39,7 @@ jobs:
 
       - name: Commit & Push Generated Tasks and Patches
         run: |
-          git config --global user.name "sentinel-bot"
-          git config --global user.email "bot@sentinel.local"
-          git add src/sentinel/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update bounties and generated patches [skip ci]" && git push)
-          
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || (git commit -m "auto: update bounties and generated patches [skip ci]" && git push)
