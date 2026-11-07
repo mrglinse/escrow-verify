@@ -23,8 +23,7 @@ jobs:
 
       - name: Install Dependencies & TSX
         run: |
-          npm install tsx typescript @types/node @octokit/rest
-
+          npm install tsx typescript @types/node @octokit/rest @supabase/supabase-js
       - name: Ensure Data Directories Exist
         run: mkdir -p src/sentinel/data src/sentinel/patches
 
