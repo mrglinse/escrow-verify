@@ -24,11 +24,15 @@ jobs:
       - name: Install Dependencies & TSX
         run: |
           npm install tsx typescript @types/node @octokit/rest @supabase/supabase-js
+
       - name: Ensure Data Directories Exist
         run: mkdir -p src/sentinel/data src/sentinel/patches
 
       - name: Execute Anti-Scam Opportunity Scout
         run: npx tsx src/sentinel/opportunity-scout.ts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Execute Claude-Audited Worker Engine
         env:
