@@ -3,31 +3,26 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase URL or Key in environment variables.');
+}
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function saveBountiesToSupabase(bounties: any[]) {
-  if (!supabaseUrl || !supabaseKey) {
-    console.log('⚠️ Supabase credentials missing. Skipping cloud sync.');
-    return;
+  if (!bounties || bounties.length === 0) return;
+
+  console.log(`☁️ Syncing ${bounties.length} bounties to Supabase...`);
+  
+  const { data, error } = await supabase
+    .from('bounty_queue')
+    .upsert(bounties, { onConflict: 'id' });
+
+  if (error) {
+    console.error('❌ Error saving to Supabase:', error);
+    throw error;
   }
 
-  for (const bounty of bounties) {
-    const { error } = await supabase
-      .from('bounty_queue')
-      .upsert({
-        id: bounty.id,
-        title: bounty.title,
-        repo: bounty.repo,
-        url: bounty.url,
-        body: bounty.body,
-        reward: bounty.reward,
-        source: bounty.source,
-        status: bounty.status || 'pending'
-      }, { onConflict: 'id', ignoreDuplicates: true });
-
-    if (error) {
-      console.error(`❌ Error inserting bounty ${bounty.id}:`, error.message);
-    }
-  }
-  console.log(`☁️ Synced bounty batch to Supabase successfully.`);
+  console.log('✅ Successfully synced bounties to Supabase!');
+  return data;
 }
