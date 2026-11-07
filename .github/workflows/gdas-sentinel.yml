@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies & TSX
         run: |
           npm init -y
-          npm install tsx typescript @types/node
+          npm install tsx typescript @types/node @octokit/rest,
 
       - name: Ensure Data Directories Exist
         run: mkdir -p src/sentinel/data src/sentinel/patches
