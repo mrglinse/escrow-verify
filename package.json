@@ -10,5 +10,26 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "description": "Stage A monitors a small, fixed set of official Ethereum and Solana Foundation sources for grant and ecosystem-program announcements. It has no trading, deposit, fee, wallet, or account-creation functionality. Discovered entries are leads for human review, not confirmed or currently open offers.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrglinse/escrow-verify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mrglinse/escrow-verify/issues"
+  },
+  "homepage": "https://github.com/mrglinse/escrow-verify#readme",
+  "dependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }
