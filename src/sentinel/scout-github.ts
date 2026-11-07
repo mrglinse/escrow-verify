@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-export async function fetchGitHubBounties() {
-  console.log('🔍 [Scout 3: GitHub Native] Searching open Web3/TypeScript bounties...');
+export async function fetchGithubBounties() {
+  console.log('🔍 [Scout 3: GitHub Native] Searching open web3/typescript bounties...');
   try {
     const query = encodeURIComponent('is:issue is:open label:bounty language:typescript');
     const res = await fetch(`https://api.github.com/search/issues?q=${query}&sort=created&order=desc&per_page=15`, {
@@ -18,16 +18,18 @@ export async function fetchGitHubBounties() {
     return (data.items || []).map((item: any) => ({
       id: `gh-${item.id}`,
       title: item.title,
-      repo: item.html_url.replace('https://github.com/', '').split('/issues/')[0],
+      repo: item.html_url.replace('https://github.com/', '').split('/issues')[0],
       url: item.html_url,
       body: item.body || '',
       reward: 'GitHub Bounty',
       source: 'github',
       status: 'pending',
-      discoveredAt: new Date().toISOString(),
+      discovered_at: new Date().toISOString(),
     }));
   } catch (err) {
-    console.error('❌ [GitHub Scout Error]:', err);
+    console.error('❌ [Github Scout Error]:', err);
     return [];
   }
 }
+
+export default fetchGithubBounties;
