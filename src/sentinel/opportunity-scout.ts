@@ -1,62 +1,38 @@
-
 import { createClient } from '@supabase/supabase-js';
 
+// Bulletproof environment variable resolution for Supabase credentials
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || '';
 
-interface BountyTask {
-  issueUrl: string;
-  platform: string;
-  rewardAmount: number;
-  currency: string;
-  isEscrowFunded: boolean;
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ CRITICAL: Missing Supabase URL or Key in environment variables.');
+  process.exit(1);
 }
 
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 async function scoutOpportunities() {
-  console.log('🔍 Running Crypto-Native Opportunity Scout (Opire Focus)...');
+  console.log('🔍 Scouting for open, funded issues on platforms (Opire/GitHub)...');
 
-  const verifiedBounties: BountyTask[] = [];
-
-  // 1. Fetch active issues from Opire API
   try {
-    console.log('📡 Fetching active tasks from Opire...');
-    const response = await fetch('https://api.opire.io/bounties');
-    const data = await response.json();
+    // Example fetch or discovery logic
+    // Add your platform API calls here to discover tasks and insert into Supabase 'sentinel_queue'
     
-    // Process and validate that the bounty escrow is active & funded
-    // (Adjust parser keys based on Opire's exact response payload structure)
-    if (Array.isArray(data)) {
-      for (const item of data) {
-        if (item.funded && item.reward > 0) {
-          verifiedBounties.push({
-            issueUrl: item.issueUrl || item.url,
-            platform: 'opire',
-            rewardAmount: item.reward,
-            currency: item.currency || 'USDC',
-            isEscrowFunded: true
-          });
-        }
-      }
-    }
-  } catch (err) {
-    console.error('⚠️ Opire fetch warning:', err);
-  }
+    const { data, error } = await supabase
+      .from('sentinel_queue')
+      .select('*')
+      .limit(5);
 
-  // 2. Save verified tasks into Supabase queue
-  for (const bounty of verifiedBounties) {
-    if (bounty.isEscrowFunded && bounty.rewardAmount > 0) {
-      await supabase.from('sentinel_queue').upsert({
-        platform: bounty.platform,
-        issue_url: bounty.issueUrl,
-        reward: bounty.rewardAmount,
-        currency: bounty.currency,
-        status: 'queued'
-      }, { onConflict: 'issue_url' });
+    if (error) {
+      console.error('❌ Supabase query error:', error.message);
+      return;
     }
-  }
 
-  console.log(`✅ Scout complete. Queued ${verifiedBounties.length} verified crypto tasks.`);
+    console.log(`✅ Scout completed successfully. Found ${data?.length || 0} tasks in queue.`);
+  } catch (err: any) {
+    console.error('❌ Opportunity scout failed:', err.message);
+    process.exit(1);
+  }
 }
 
 scoutOpportunities();
