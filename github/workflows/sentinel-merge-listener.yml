@@ -1,0 +1,31 @@
+name: Sentinel PR Merge Listener
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  track-merge:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies & TSX
+        run: |
+          npm install tsx @supabase/supabase-js
+
+      - name: Execute Merge & Payout Trigger Script
+        run: npx tsx src/sentinel/merge-handler.ts
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
