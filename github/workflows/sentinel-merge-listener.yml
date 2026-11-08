@@ -1,31 +1,46 @@
-name: Sentinel PR Merge Listener
+name: GDAS Sentinel Automation
 
 on:
-  pull_request:
-    types: [closed]
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
-  track-merge:
+  run-sentinel:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    
+    # Global environment variables for the entire job so all steps inherit them
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
+      RPC_URL: ${{ secrets.RPC_URL }}
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
-      - name: Install Dependencies & TSX
+      - name: Install dependencies and missing type definitions
         run: |
-          npm install tsx @supabase/supabase-js
+          npm install
+          npm install --save-dev @types/node ethers
 
-      - name: Execute Merge & Payout Trigger Script
-        run: npx tsx src/sentinel/merge-handler.ts
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+      - name: Build TypeScript files
+        run: npx tsc src/sentinel/*.ts --outDir dist/sentinel --target es2022 --module nodenext --moduleResolution nodenext --esModuleInterop --skipLibCheck
+
+      - name: Run Opportunity Scout
+        run: node dist/sentinel/opportunity-scout.js
+
+      - name: Run Worker Engine
+        run: node dist/sentinel/worker-engine.js
+
+      - name: Run Payout Handler
+        run: node dist/sentinel/payout-handler.js
