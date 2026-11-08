@@ -18,21 +18,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies and build
+        run: |
+          npm install
+          npx tsc
 
       - name: Run Opportunity Scout
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npx ts-node src/sentinel/opportunity-scout.ts
+        run: node dist/sentinel/opportunity-scout.js
 
       - name: Run Worker Engine
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: npx ts-node src/sentinel/worker-engine.ts
+        run: node dist/sentinel/worker-engine.js
 
       - name: Run Payout Handler
         env:
@@ -40,4 +42,4 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
           RPC_URL: ${{ secrets.RPC_URL }}
-        run: npx ts-node src/sentinel/payout-handler.ts
+        run: node dist/sentinel/payout-handler.js
