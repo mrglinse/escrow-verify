@@ -1,3 +1,4 @@
+
 name: GDAS Sentinel Automation
 
 on:
@@ -24,7 +25,7 @@ jobs:
           npm install --save-dev @types/node ethers
 
       - name: Build TypeScript files
-        run: npx tsc src/sentinel/*.ts --outDir dist/sentinel --target es2022 --module commonjs --esModuleInterop --skipLibCheck
+        run: npx tsc src/sentinel/*.ts --outDir dist/sentinel --target es2022 --module nodenext --moduleResolution nodenext --esModuleInterop --skipLibCheck
 
       - name: Run Opportunity Scout
         env:
