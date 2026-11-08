@@ -1,15 +1,47 @@
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
-import * as fs from 'fs';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function runWorkerEngine() {
-  console.log('🤖 Initializing Sentinel Worker Engine...');
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 
-  // 1. Fetch the next queued verified task from Supabase
+async function generatePatchWithOpenRouter(issueDescription: string): Promise<string> {
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://github.com/mrglinse/escrow-verify', // Optional: for rankings
+      'X-Title': 'GDAS Sentinel' // Optional: app identifier
+    },
+    body: JSON.stringify({
+      model: 'openrouter/free', // Automatically routes to available free models with coding support
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an autonomous senior software engineer. Analyze the given GitHub issue and write a precise code patch to solve it. Return clean implementation code.'
+        },
+        {
+          role: 'user',
+          content: issueDescription
+        }
+      ]
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(`OpenRouter API error: ${JSON.stringify(data)}`);
+  }
+
+  return data.choices[0]?.message?.content || '// No patch generated';
+}
+
+async function runWorkerEngine() {
+  console.log('🤖 Initializing Sentinel Worker Engine with OpenRouter...');
+
   const { data: tasks, error } = await supabase
     .from('sentinel_queue')
     .select('*')
@@ -24,34 +56,29 @@ async function runWorkerEngine() {
   const task = tasks[0];
   console.log(`🎯 Processing Task ID: ${task.id} | Issue: ${task.issue_url}`);
 
-  // Update status to processing to prevent double-execution
   await supabase
     .from('sentinel_queue')
     .update({ status: 'processing' })
     .eq('id', task.id);
 
   try {
-    // 2. Setup branch name and workspace environment
     const branchName = `gdas-fix-${task.id.slice(0, 6)}`;
     execSync(`git checkout -b ${branchName}`);
 
-    console.log('💡 Invoking Claude AI auditor/coder to generate solution patch...');
-    // Here your worker processes the issue context, analyzes files, 
-    // and writes code changes into the repository workspace.
+    console.log('💡 Requesting free open-source model patch from OpenRouter...');
+    const patchContent = await generatePatchWithOpenRouter(task.issue_url);
 
-    // Example mock code insertion or test file generation
-    // fs.writeFileSync('patch-output.ts', '// generated code implementation');
+    // Apply generated content to repository workspace file or patch output
+    // fs.writeFileSync('src/patch-output.ts', patchContent);
 
-    // 3. Stage changes, commit, and push branch using GitHub Actions permissions
     execSync('git config user.name "GDAS Sentinel Bot"');
     execSync('git config user.email "sentinel@bot.internal"');
     execSync('git add .');
-    execSync(`git commit -m "fix: autonomous resolution for bounty task ${task.issue_url}"`);
+    execSync(`git commit -m "fix: autonomous resolution via OpenRouter free tier for task ${task.issue_url}"`);
     execSync(`git push origin ${branchName}`);
 
     console.log(`🚀 Successfully pushed fix branch: ${branchName}`);
 
-    // 4. Update Supabase queue status to PR opened
     await supabase
       .from('sentinel_queue')
       .update({ status: 'pr_opened', branch_name: branchName })
